@@ -1,9 +1,11 @@
 import express from 'express';
 import { runQuery } from './query';
-import { compile } from './compile';
+import { compile, META } from './compile';
 
 const app = express();
 app.use(express.json());
+
+app.get('/api/meta', (_req, res) => res.json(META));
 
 app.post('/api/query', async (req, res) => {
   try {

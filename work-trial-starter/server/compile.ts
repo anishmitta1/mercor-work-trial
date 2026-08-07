@@ -1,13 +1,18 @@
 import type { QuerySpec, DimensionDef } from "./types";
 
 // Whitelists: the only names a spec may reference. Grow by adding one line.
-const MEASURES: Record<string, string> = {
-  cost: "SUM(cost_usd)",
-  tokens: "SUM(tokens)",
-  requests: "SUM(requests)",
-  p95_latency: "QUANTILE_DISC(latency_ms, 0.95)",
-  unknown_share:
-    "SUM(CASE WHEN attribution_status = 'unknown' THEN cost_usd END) / SUM(cost_usd)",
+// A measure is a SQL fragment plus how to display its result.
+type MeasureDef = { sql: string; format: "usd" | "number" | "ms" | "percent" };
+
+const MEASURES: Record<string, MeasureDef> = {
+  cost: { sql: "SUM(cost_usd)", format: "usd" },
+  tokens: { sql: "SUM(tokens)", format: "number" },
+  requests: { sql: "SUM(requests)", format: "number" },
+  p95_latency: { sql: "QUANTILE_DISC(latency_ms, 0.95)", format: "ms" },
+  unknown_share: {
+    sql: "SUM(CASE WHEN attribution_status = 'unknown' THEN cost_usd END) / SUM(cost_usd)",
+    format: "percent",
+  },
 };
 
 const DIMENSIONS: Record<string, DimensionDef> = {
@@ -27,10 +32,10 @@ function dimensionLookup(name: string): DimensionDef {
   return def;
 }
 
-function measureLookup(name: string): string {
-  const sql = MEASURES[name];
-  if (!sql) throw new Error(`unknown measure: ${name}`);
-  return sql;
+function measureLookup(name: string): MeasureDef {
+  const def = MEASURES[name];
+  if (!def) throw new Error(`unknown measure: ${name}`);
+  return def;
 }
 
 // Time bucket expression; grain is whitelisted since it lands inside SQL
@@ -50,7 +55,7 @@ function getColumns(spec: QuerySpec): string[] {
   return [
     ...(time ? [`${time} AS time`] : []),
     ...dimensions.map((d) => dimensionLookup(d).col),
-    ...measures.map((m) => `${measureLookup(m)} AS ${m}`),
+    ...measures.map((m) => `${measureLookup(m).sql} AS ${m}`),
   ];
 }
 
@@ -108,6 +113,13 @@ function getOrderBy(spec: QuerySpec): string {
 function getLimit({ limit }: QuerySpec): string {
   return limit ? `LIMIT ${Math.min(Math.trunc(limit), 10000)}` : "";
 }
+
+// The vocabulary a spec may use — drives the widget-config UI (GET /api/meta)
+export const META = {
+  measures: Object.entries(MEASURES).map(([key, m]) => ({ key, format: m.format })),
+  dimensions: Object.keys(DIMENSIONS),
+  timeGrains: [...GRAINS],
+};
 
 export function compile(spec: QuerySpec): string {
   const columns = getColumns(spec).join(", ");
