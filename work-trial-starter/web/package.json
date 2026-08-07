@@ -1,0 +1,23 @@
+{
+  "name": "work-trial-web",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "^5.6.3",
+    "vite": "^6.0.0"
+  },
+  "//": "A minimal shell to remove boilerplate — replace/restructure freely. Add the libraries you choose (ag-grid, @tanstack/*, @glideapps/glide-data-grid, @uwdata/mosaic-*, @duckdb/duckdb-wasm, a charting lib, etc.)."
+}

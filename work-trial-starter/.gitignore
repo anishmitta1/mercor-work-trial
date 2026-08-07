@@ -1,0 +1,9 @@
+node_modules/
+web/node_modules/
+web/dist/
+web/.vite/
+*.log
+.DS_Store
+# Parquet is derived from the committed CSV (see tools/to_parquet.md)
+*.parquet
+# Data CSVs ARE committed on purpose (they are the fixture). Do not ignore them.

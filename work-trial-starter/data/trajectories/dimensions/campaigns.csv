@@ -1,0 +1,9 @@
+campaign_id,campaign_name,segment
+cmp_0001,campaign-1,startup
+cmp_0002,campaign-2,startup
+cmp_0003,campaign-3,startup
+cmp_0004,campaign-4,enterprise
+cmp_0005,campaign-5,internal
+cmp_0006,campaign-6,startup
+cmp_0007,campaign-7,enterprise
+cmp_0008,campaign-8,startup

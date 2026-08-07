@@ -1,0 +1,11 @@
+model_id,provider,input_price_per_mtok,output_price_per_mtok,cache_read_price_per_mtok,cache_write_price_per_mtok
+m_claude_opus,anthropic,15,75,1.5,18.75
+m_claude_sonnet,anthropic,3,15,0.3,3.75
+m_claude_haiku,anthropic,0.8,4,0.08,1
+m_gpt5,openai,10,30,1.25,12.5
+m_gpt5_mini,openai,0.5,2,0.05,0.6
+m_gpt4o,openai,2.5,10,1.25,3
+m_gemini_pro,google,3.5,10.5,0.35,4
+m_gemini_flash,google,0.3,1.2,0.03,0.4
+m_llama3_70b,meta,0.6,0.7,0.06,0.7
+m_mistral_large,mistral,2,6,0.2,2.5

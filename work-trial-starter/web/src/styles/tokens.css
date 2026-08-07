@@ -1,0 +1,84 @@
+/*
+ * Design tokens — the starting point for the "one system" look.
+ * RULE: components must reference these variables, never hard-coded colors.
+ * Extend freely (add scales, a dark-mode refinement, motion tokens, etc.).
+ * Palette is intentionally neutral with a single restrained accent — let the
+ * data carry the color. See design/NOTES.md for the philosophy.
+ */
+:root {
+  /* neutrals */
+  --bg: #ffffff;
+  --surface: #fbfbfa;
+  --surface-2: #f4f4f2;
+  --border: #e7e7e4;
+  --border-strong: #d6d6d1;
+  --text: #1a1a19;
+  --text-muted: #6b6b66;
+  --text-subtle: #9a9a93;
+
+  /* single accent */
+  --accent: #3a5bd9;
+  --accent-hover: #2f49b0;
+  --accent-weak: #eef1fc;
+
+  /* status */
+  --success: #17795e;
+  --warn: #9a6b00;
+  --danger: #b4342b;
+  --success-weak: #e6f3ee;
+  --warn-weak: #fbf1da;
+  --danger-weak: #f9e7e5;
+
+  /* categorical series (colorblind-considerate, muted to sit calmly on white) */
+  --cat-1: #3a5bd9;
+  --cat-2: #17795e;
+  --cat-3: #b4342b;
+  --cat-4: #9a6b00;
+  --cat-5: #6b4fa8;
+  --cat-6: #2b7a9e;
+  --cat-7: #a8497f;
+  --cat-8: #5c7a2b;
+
+  /* type + rhythm */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Inter, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  --fs-xs: 12px;  --fs-sm: 13px;  --fs-md: 14px;  --fs-lg: 16px;  --fs-xl: 20px;  --fs-2xl: 28px;
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 24px; --space-6: 32px; --space-8: 48px;
+  --radius: 8px;  --radius-sm: 6px;  --radius-lg: 12px;
+  --shadow-sm: 0 1px 2px rgba(20, 20, 19, 0.05);
+  --shadow: 0 1px 3px rgba(20, 20, 19, 0.08), 0 4px 12px rgba(20, 20, 19, 0.05);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #141413;
+    --surface: #1b1b19;
+    --surface-2: #232320;
+    --border: #2e2e2a;
+    --border-strong: #3a3a35;
+    --text: #f2f2ef;
+    --text-muted: #a5a59d;
+    --text-subtle: #74746c;
+    --accent: #8aa0f0;
+    --accent-hover: #a5b6f5;
+    --accent-weak: #20233a;
+    --success-weak: #16281f;
+    --warn-weak: #2b230f;
+    --danger-weak: #2c1817;
+    --cat-1: #8aa0f0; --cat-2: #4fbf9a; --cat-3: #e0685e; --cat-4: #d9a441;
+    --cat-5: #a389d9; --cat-6: #5fb0cf; --cat-7: #d47fae; --cat-8: #8fb356;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+}
+
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; }
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--fs-md);
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}

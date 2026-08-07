@@ -1,0 +1,62 @@
+{
+  "scenario": "llm_spend",
+  "seed": 20260630,
+  "as_of": "2026-06-30T23:00:00Z",
+  "row_count": 51493,
+  "conventions": "All timestamps UTC. Date ranges are half-open [start, end). p95 = nearest-rank over non-null values: sort ascending, take the value at index ceil(0.95*N) (1-based). Money compared with tolerance; ratios likewise.",
+  "queries": [
+    {
+      "id": "total_cost_customer_C_00007_june",
+      "result_type": "number",
+      "tolerance_abs": 0.01,
+      "question": "Total cost_usd for customer C_00007 in June 2026 (UTC).",
+      "definition": "SUM(cost_usd) WHERE customer_id='C_00007' AND ts IN ['2026-06-01T00:00:00Z','2026-07-01T00:00:00Z'). Includes any credit rows.",
+      "expected": 14548.440841
+    },
+    {
+      "id": "top5_models_by_output_tokens_june",
+      "result_type": "string[]",
+      "question": "Top 5 model_id by output tokens in June 2026, most first.",
+      "definition": "Rows WHERE token_type='output' AND ts in June 2026; GROUP BY model_id SUM(tokens); ORDER BY sum DESC, model_id ASC; take 5 model_id.",
+      "expected": [
+        "m_claude_sonnet",
+        "m_gpt5_mini",
+        "m_claude_haiku",
+        "m_claude_opus",
+        "m_gpt5"
+      ]
+    },
+    {
+      "id": "cost_trajectory_runner_spike_day",
+      "result_type": "number",
+      "tolerance_abs": 0.01,
+      "question": "Total cost_usd for service svc_trajectory_runner on 2026-06-20 (UTC).",
+      "definition": "SUM(cost_usd) WHERE service_id='svc_trajectory_runner' AND date(ts)='2026-06-20'.",
+      "expected": 54211.968259
+    },
+    {
+      "id": "unknown_cost_share",
+      "result_type": "number",
+      "tolerance_abs": 0.0005,
+      "question": "Share of total cost_usd that is unattributed.",
+      "definition": "SUM(cost_usd WHERE attribution_status='unknown') / SUM(cost_usd) over the full dataset (net of credits).",
+      "expected": 0.119271
+    },
+    {
+      "id": "p95_latency_anthropic_prod_week",
+      "result_type": "number",
+      "tolerance_abs": 1,
+      "question": "p95 latency_ms for provider=anthropic, environment=prod, week of 2026-06-08.",
+      "definition": "Nearest-rank p95 of non-null latency_ms WHERE provider='anthropic' AND environment='prod' AND ts IN ['2026-06-08T00:00:00Z','2026-06-15T00:00:00Z').",
+      "expected": 3800
+    },
+    {
+      "id": "net_cost_enterprise_segment",
+      "result_type": "number",
+      "tolerance_abs": 0.01,
+      "question": "Net cost_usd (incl. credits) for enterprise-segment customers, full dataset.",
+      "definition": "SUM(cost_usd) for rows whose customer_id joins customers.segment='enterprise'. Unattributed rows (null customer_id) excluded.",
+      "expected": 507509.178293
+    }
+  ]
+}

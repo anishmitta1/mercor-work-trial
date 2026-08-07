@@ -1,0 +1,16 @@
+world_id,world_name,campaign_id,task_type
+w_0001,world-1,cmp_0001,browsecomp
+w_0002,world-2,cmp_0002,swe_bench
+w_0003,world-3,cmp_0003,gdpval
+w_0004,world-4,cmp_0004,hle
+w_0005,world-5,cmp_0005,terminal_bench
+w_0006,world-6,cmp_0006,legalbench
+w_0007,world-7,cmp_0007,apex_agents
+w_0008,world-8,cmp_0008,browsecomp
+w_0009,world-9,cmp_0001,swe_bench
+w_0010,world-10,cmp_0002,gdpval
+w_0011,world-11,cmp_0003,hle
+w_0012,world-12,cmp_0004,terminal_bench
+w_0013,world-13,cmp_0005,legalbench
+w_0014,world-14,cmp_0006,apex_agents
+w_0015,world-15,cmp_0007,browsecomp

@@ -1,0 +1,13 @@
+service_id,service_name,team,surface
+svc_annotation_api,annotation api,Studio Platform,backend_service
+svc_trajectory_runner,trajectory runner,RL Environments,backend_service
+svc_batch_grader,batch grader,RL Environments,batch_job
+svc_web_app,web app,Studio Experience,web_app
+svc_ingest,ingest,Data Platform,backend_service
+svc_search,search,Studio Platform,backend_service
+svc_maven_agent,maven agent,Support,backend_service
+svc_headshot,headshot,Growth,backend_service
+svc_voice,voice,Growth,backend_service
+svc_playground,playground,Studio Experience,web_app
+svc_eval_orchestrator,eval orchestrator,RL Environments,batch_job
+svc_sourcing,sourcing,Marketplace,backend_service
