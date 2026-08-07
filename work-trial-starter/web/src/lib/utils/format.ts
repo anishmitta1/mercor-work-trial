@@ -1,6 +1,6 @@
 // Authoritative value formatting. The measure's registry entry declares the format;
 // this is the only place that knows what the formats mean.
-import type { MeasureFormat } from "./api";
+import type { MeasureFormat } from "../api/client";
 
 const compact = new Intl.NumberFormat("en-US", {
   notation: "compact",

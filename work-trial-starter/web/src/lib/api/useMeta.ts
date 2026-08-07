@@ -1,6 +1,6 @@
 // Meta (measures/dimensions/grains + formats) — fetched once, cached forever per session.
 import { useQuery } from "@tanstack/react-query";
-import { getMeta, type MeasureFormat } from "./api";
+import { getMeta, type MeasureFormat } from "./client";
 
 export function useMeta() {
   return useQuery({ queryKey: ["meta"], queryFn: getMeta, staleTime: Infinity });

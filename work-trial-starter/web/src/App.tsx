@@ -1,4 +1,5 @@
 import { Widget, type WidgetDef } from "./lib/Widget";
+import { YStack } from "./lib/primitives/Stack";
 
 const widgets: WidgetDef[] = [
   {
@@ -21,25 +22,19 @@ const widgets: WidgetDef[] = [
     spec: {
       measures: ["cost"],
       dimensions: ["model_id"],
-      orderBy: [{ key: "cost", dir: "asc" }],
+      orderBy: [{ key: "cost", dir: "desc" }],
     },
   },
 ];
 
 export function App() {
   return (
-    <main
-      style={{
-        maxWidth: 960,
-        margin: "0 auto",
-        padding: "var(--space-8) var(--space-5)",
-        display: "grid",
-        gap: "var(--space-4)",
-      }}
-    >
-      {widgets.map((w) => (
-        <Widget key={w.title} def={w} />
-      ))}
+    <main style={{ maxWidth: 960, margin: "0 auto", padding: "var(--space-8) var(--space-5)" }}>
+      <YStack gap={4}>
+        {widgets.map((w) => (
+          <Widget key={w.title} def={w} />
+        ))}
+      </YStack>
     </main>
   );
 }

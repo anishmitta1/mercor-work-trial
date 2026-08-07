@@ -1,9 +1,9 @@
 // A widget = a renderer type + a query spec. Nothing else.
 // (Position/layout fields slot into this type later without touching renderers.)
-import { useQuerySpec } from "./useQuerySpec";
-import { useMeasureFormat } from "./useMeta";
-import { formatValue } from "./format";
-import type { QuerySpec, Row } from "./api";
+import { useQuerySpec } from "./api/useQuerySpec";
+import { useMeasureFormat } from "./api/useMeta";
+import { formatValue } from "./utils/format";
+import type { QuerySpec, Row } from "./api/client";
 
 export type WidgetDef = {
   type: "kpi" | "series" | "table";
