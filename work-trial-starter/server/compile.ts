@@ -10,6 +10,9 @@ const DIMENSIONS: Record<string, string> = {
   model_id: "model_id",
   provider: "provider",
   environment: "environment",
+  customer_id: "customer_id",
+  service_id: "service_id",
+  token_type: "token_type",
 };
 
 function dimensionLookup(name: string): string {
@@ -32,14 +35,45 @@ function getColumns({ measures, dimensions = [] }: QuerySpec): string[] {
   ];
 }
 
-export function compile(spec: QuerySpec): string {
-  const dimensions = spec.dimensions ?? [];
-  const columns = getColumns(spec).join(", ");
-  const groupBy = !dimensions.length
-    ? ""
-    : `GROUP BY ${dimensions.map(dimensionLookup).join(", ")}`;
+// WHERE clause: half-open date range, then dimension filters
+function getWhere({ filters = [], dateRange }: QuerySpec): string {
+  const quote = (v: string | number) =>
+    typeof v === "number" ? String(v) : `'${v.replaceAll("'", "''")}'`;
 
-  let sql = `SELECT ${columns} FROM usage_events ${groupBy}`;
+  const clauses: string[] = [];
+  if (dateRange)
+    clauses.push(
+      `ts >= ${quote(dateRange.start)}`,
+      `ts < ${quote(dateRange.end)}`,
+    );
+  for (const f of filters)
+    clauses.push(
+      `${dimensionLookup(f.dim)} IN (${f.values.map(quote).join(", ")})`,
+    );
+  return clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
+}
+
+export function compile(spec: QuerySpec): string {
+  const columns = getColumns(spec).join(", ");
+  const where = getWhere(spec);
+  const groupBy = !spec.dimensions?.length
+    ? ""
+    : `GROUP BY ${spec.dimensions.map(dimensionLookup).join(", ")}`;
+
+  // ORDER BY keys must be names the spec itself selected (measure or dimension)
+  const selectable = new Set([...spec.measures, ...(spec.dimensions ?? [])]);
+  const orderBy = !spec.orderBy?.length
+    ? ""
+    : `ORDER BY ${spec.orderBy
+        .map((o) => {
+          if (!selectable.has(o.key)) throw new Error(`cannot order by: ${o.key}`);
+          return `${o.key} ${o.dir === "asc" ? "ASC" : "DESC"}`;
+        })
+        .join(", ")}`;
+
+  const limit = spec.limit ? `LIMIT ${Math.min(Math.trunc(spec.limit), 10000)}` : "";
+
+  let sql = `SELECT ${columns} FROM usage_events ${where} ${groupBy} ${orderBy} ${limit}`;
 
   return sql;
 }
