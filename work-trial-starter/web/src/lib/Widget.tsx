@@ -3,13 +3,13 @@
 import { useQuerySpec } from "./api/useQuerySpec";
 import { useMeasureFormat } from "./api/useMeta";
 import { formatValue } from "./utils/format";
-import type { QuerySpec, Row } from "./api/client";
+import { WidgetConfig } from "./WidgetConfig";
+import { XStack } from "./primitives/Stack";
+import { Text } from "./primitives/Text";
+import type { WidgetDef } from "./types";
+import type { Row } from "./api/client";
 
-export type WidgetDef = {
-  type: "kpi" | "series" | "table";
-  title: string;
-  spec: QuerySpec;
-};
+export type { WidgetDef } from "./types";
 
 // Each widget type expects its rows in a certain shape; reject specs that can't produce it.
 function validateWidget(def: WidgetDef): string | null {
@@ -28,12 +28,23 @@ function validateWidget(def: WidgetDef): string | null {
   }
 }
 
-export function Widget({ def }: { def: WidgetDef }) {
+export function Widget({
+  def,
+  editing,
+  onToggleEdit,
+  onChange,
+}: {
+  def: WidgetDef;
+  editing?: boolean;
+  onToggleEdit?: () => void;
+  onChange?: (next: WidgetDef) => void;
+}) {
   const invalid = validateWidget(def);
   const { data: rows, isPending, error } = useQuerySpec(def.spec, !invalid);
 
   return (
     <section
+      className="widget"
       style={{
         background: "var(--surface)",
         border: "1px solid var(--border)",
@@ -41,15 +52,34 @@ export function Widget({ def }: { def: WidgetDef }) {
         padding: "var(--space-4)",
       }}
     >
-      <h3 style={{ margin: 0, fontSize: "var(--fs-sm)", color: "var(--text-muted)" }}>
-        {def.title}
-      </h3>
-      <div style={{ marginTop: "var(--space-3)", fontSize: "var(--fs-md)" }}>
-        {invalid && <span style={{ color: "var(--warn)" }}>Invalid config: {invalid}</span>}
-        {!invalid && isPending && (
-          <span style={{ color: "var(--text-subtle)" }}>Loading…</span>
+      <XStack justify="space-between" align="center">
+        <Text variant="cardTitle" as="h3">
+          {def.title}
+        </Text>
+        {onToggleEdit && (
+          <button
+            className="widget-edit"
+            aria-expanded={!!editing}
+            onClick={onToggleEdit}
+            style={{
+              font: "inherit",
+              fontSize: "var(--fs-xs)",
+              color: editing ? "var(--accent)" : "var(--text-subtle)",
+              background: "none",
+              border: "none",
+              padding: 0,
+              cursor: "pointer",
+            }}
+          >
+            {editing ? "Done" : "Edit"}
+          </button>
         )}
-        {!invalid && error && <span style={{ color: "var(--danger)" }}>{error.message}</span>}
+      </XStack>
+      <div style={{ marginTop: "var(--space-3)" }}>
+        {editing && onChange && <WidgetConfig def={def} onChange={onChange} />}
+        {invalid && <Text variant="warn">Invalid config: {invalid}</Text>}
+        {!invalid && isPending && <Text variant="subtle">Loading…</Text>}
+        {!invalid && error && <Text variant="error">{error.message}</Text>}
         {!invalid && rows && <WidgetBody def={def} rows={rows} />}
       </div>
     </section>
@@ -57,8 +87,7 @@ export function Widget({ def }: { def: WidgetDef }) {
 }
 
 function WidgetBody({ def, rows }: { def: WidgetDef; rows: Row[] }) {
-  if (rows.length === 0)
-    return <span style={{ color: "var(--text-subtle)" }}>No data in this range</span>;
+  if (rows.length === 0) return <Text variant="subtle">No data in this range</Text>;
 
   switch (def.type) {
     case "kpi":
@@ -75,11 +104,7 @@ function WidgetBody({ def, rows }: { def: WidgetDef; rows: Row[] }) {
 function KpiView({ def, rows }: { def: WidgetDef; rows: Row[] }) {
   const format = useMeasureFormat(def.spec.measures[0]);
   const value = Number(Object.values(rows[0])[0]);
-  return (
-    <span style={{ fontSize: "var(--fs-2xl)", fontVariantNumeric: "tabular-nums" }}>
-      {formatValue(value, format)}
-    </span>
-  );
+  return <Text variant="stat">{formatValue(value, format)}</Text>;
 }
 
 function SeriesView({ rows }: { rows: Row[] }) {
