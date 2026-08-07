@@ -1,13 +1,14 @@
-import type { QuerySpec } from "./types";
+import type { QuerySpec, DimensionDef } from "./types";
 
 // Whitelists: the only names a spec may reference. Grow by adding one line.
 const MEASURES: Record<string, string> = {
   cost: "SUM(cost_usd)",
   tokens: "SUM(tokens)",
+  requests: "SUM(requests)",
+  p95_latency: "QUANTILE_DISC(latency_ms, 0.95)",
+  unknown_share:
+    "SUM(CASE WHEN attribution_status = 'unknown' THEN cost_usd END) / SUM(cost_usd)",
 };
-
-// A dimension is a column plus an optional join needed to reach it.
-type DimensionDef = { col: string; join?: string };
 
 const DIMENSIONS: Record<string, DimensionDef> = {
   model_id: { col: "model_id" },
@@ -16,6 +17,7 @@ const DIMENSIONS: Record<string, DimensionDef> = {
   customer_id: { col: "customer_id" },
   service_id: { col: "service_id" },
   token_type: { col: "token_type" },
+  attribution_status: { col: "attribution_status" },
   segment: { col: "c.segment", join: "JOIN customers c USING (customer_id)" },
 };
 

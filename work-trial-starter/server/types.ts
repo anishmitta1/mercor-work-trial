@@ -1,4 +1,4 @@
-export type TimeGrain = 'hour' | 'day' | 'week' | 'month';
+export type TimeGrain = "hour" | "day" | "week" | "month";
 
 export type Filter = {
   dim: string;
@@ -11,6 +11,8 @@ export type QuerySpec = {
   timeGrain?: TimeGrain; // optional time bucket, becomes a 'time' column
   filters?: Filter[]; // dimension filters
   dateRange?: { start: string; end: string }; // half-open [start, end), UTC
-  orderBy?: { key: string; dir: 'asc' | 'desc' }[];
+  orderBy?: { key: string; dir: "asc" | "desc" }[];
   limit?: number;
 };
+
+export type DimensionDef = { col: string; join?: string };
