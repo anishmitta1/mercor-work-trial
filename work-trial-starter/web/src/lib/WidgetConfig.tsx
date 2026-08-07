@@ -18,9 +18,11 @@ const fieldStyle = {
 export function WidgetConfig({
   def,
   onChange,
+  onRemove,
 }: {
   def: WidgetDef;
   onChange: (next: WidgetDef) => void;
+  onRemove?: () => void;
 }) {
   const { data: meta } = useMeta();
   if (!meta) return null;
@@ -120,6 +122,12 @@ export function WidgetConfig({
             </option>
           ))}
         </select>
+      )}
+
+      {onRemove && (
+        <button style={{ ...fieldStyle, color: "var(--danger)" }} onClick={onRemove}>
+          Remove
+        </button>
       )}
     </XStack>
   );

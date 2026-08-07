@@ -1,0 +1,7 @@
+/* react-grid-layout token overrides */
+.react-grid-item.react-grid-placeholder {
+  background: var(--accent-weak);
+  border: 1px dashed var(--accent);
+  border-radius: var(--radius);
+  opacity: 1;
+}

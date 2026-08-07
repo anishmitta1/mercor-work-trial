@@ -8,12 +8,14 @@ type StackProps = {
   justify?: CSSProperties["justifyContent"];
   children: ReactNode;
   style?: CSSProperties;
+  className?: string;
 };
 
 const make =
   (flexDirection: "row" | "column") =>
-  ({ gap = 3, align, justify, children, style }: StackProps) => (
+  ({ gap = 3, align, justify, children, style, className }: StackProps) => (
     <div
+      className={className}
       style={{
         display: "flex",
         flexDirection,

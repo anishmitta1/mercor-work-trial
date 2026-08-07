@@ -1,9 +1,11 @@
 // A widget = a renderer type + a query spec. Nothing else.
-// (Position/layout fields slot into this type later without touching renderers.)
+// (Position lives in RGL's layout array, keyed by WidgetDef.id — not here.)
 import { useQuerySpec } from "./api/useQuerySpec";
-import { useMeasureFormat } from "./api/useMeta";
+import { useMeasureFormat, useMeta } from "./api/useMeta";
 import { formatValue } from "./utils/format";
 import { WidgetConfig } from "./WidgetConfig";
+import { DataTable } from "./components/DataTable";
+import type { ColumnDef } from "@tanstack/react-table";
 import { XStack } from "./primitives/Stack";
 import { Text } from "./primitives/Text";
 import type { WidgetDef } from "./types";
@@ -31,13 +33,13 @@ function validateWidget(def: WidgetDef): string | null {
 export function Widget({
   def,
   editing,
-  onToggleEdit,
   onChange,
+  onRemove,
 }: {
   def: WidgetDef;
   editing?: boolean;
-  onToggleEdit?: () => void;
   onChange?: (next: WidgetDef) => void;
+  onRemove?: () => void;
 }) {
   const invalid = validateWidget(def);
   const { data: rows, isPending, error } = useQuerySpec(def.spec, !invalid);
@@ -50,33 +52,20 @@ export function Widget({
         border: "1px solid var(--border)",
         borderRadius: "var(--radius)",
         padding: "var(--space-4)",
+        height: "100%",
+        boxSizing: "border-box",
+        overflow: "auto",
       }}
     >
       <XStack justify="space-between" align="center">
         <Text variant="cardTitle" as="h3">
           {def.title}
         </Text>
-        {onToggleEdit && (
-          <button
-            className="widget-edit"
-            aria-expanded={!!editing}
-            onClick={onToggleEdit}
-            style={{
-              font: "inherit",
-              fontSize: "var(--fs-xs)",
-              color: editing ? "var(--accent)" : "var(--text-subtle)",
-              background: "none",
-              border: "none",
-              padding: 0,
-              cursor: "pointer",
-            }}
-          >
-            {editing ? "Done" : "Edit"}
-          </button>
-        )}
       </XStack>
       <div style={{ marginTop: "var(--space-3)" }}>
-        {editing && onChange && <WidgetConfig def={def} onChange={onChange} />}
+        {editing && onChange && (
+          <WidgetConfig def={def} onChange={onChange} onRemove={onRemove} />
+        )}
         {invalid && <Text variant="warn">Invalid config: {invalid}</Text>}
         {!invalid && isPending && <Text variant="subtle">Loading…</Text>}
         {!invalid && error && <Text variant="error">{error.message}</Text>}
@@ -95,7 +84,7 @@ function WidgetBody({ def, rows }: { def: WidgetDef; rows: Row[] }) {
     case "series":
       return <SeriesView rows={rows} />;
     case "table":
-      return <TableView rows={rows} />;
+      return <TableView def={def} rows={rows} />;
   }
 }
 
@@ -111,8 +100,22 @@ function SeriesView({ rows }: { rows: Row[] }) {
   return <RowsDump rows={rows} />;
 }
 
-function TableView({ rows }: { rows: Row[] }) {
-  return <RowsDump rows={rows} />;
+function TableView({ def, rows }: { def: WidgetDef; rows: Row[] }) {
+  const { data: meta } = useMeta();
+  const formatOf = (key: string) =>
+    meta?.measures.find((m) => m.key === key)?.format ?? "number";
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const columns: ColumnDef<Row, any>[] = [
+    ...(def.spec.dimensions ?? []).map((d) => ({ header: d, accessorKey: d })),
+    ...def.spec.measures.map((m) => ({
+      header: m,
+      accessorKey: m,
+      meta: { align: "right" as const },
+      cell: (c: { getValue: () => unknown }) => formatValue(Number(c.getValue()), formatOf(m)),
+    })),
+  ];
+  return <DataTable columns={columns} rows={rows} />;
 }
 
 function RowsDump({ rows }: { rows: Row[] }) {

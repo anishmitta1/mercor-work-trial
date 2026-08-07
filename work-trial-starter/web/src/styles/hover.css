@@ -1,9 +1,0 @@
-/* Hover-revealed card actions — CSS only, no JS hover state. */
-.widget .widget-edit {
-  opacity: 0;
-  transition: opacity 120ms ease;
-}
-.widget:hover .widget-edit,
-.widget-edit[aria-expanded="true"] {
-  opacity: 1;
-}
