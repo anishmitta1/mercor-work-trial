@@ -6,7 +6,6 @@ import { formatValue } from "./utils/format";
 import { WidgetConfig } from "./WidgetConfig";
 import { DataTable } from "./components/DataTable";
 import type { ColumnDef } from "@tanstack/react-table";
-import { XStack } from "./primitives/Stack";
 import { Text } from "./primitives/Text";
 import type { WidgetDef } from "./types";
 import type { Row } from "./api/client";
@@ -46,7 +45,6 @@ export function Widget({
 
   return (
     <section
-      className="widget"
       style={{
         background: "var(--surface)",
         border: "1px solid var(--border)",
@@ -57,11 +55,9 @@ export function Widget({
         overflow: "auto",
       }}
     >
-      <XStack justify="space-between" align="center">
-        <Text variant="cardTitle" as="h3">
-          {def.title}
-        </Text>
-      </XStack>
+      <Text variant="cardTitle" as="h3">
+        {def.title}
+      </Text>
       <div style={{ marginTop: "var(--space-3)" }}>
         {editing && onChange && (
           <WidgetConfig def={def} onChange={onChange} onRemove={onRemove} />
