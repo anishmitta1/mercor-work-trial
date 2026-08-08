@@ -1,8 +1,9 @@
 import type { QuerySpec, DimensionDef } from "./types";
 
 // Whitelists: the only names a spec may reference. Grow by adding one line.
-// A measure is a SQL fragment plus how to display its result.
-type MeasureDef = { sql: string; format: "usd" | "number" | "ms" | "percent" };
+// A measure is a SQL fragment, how to display its result, and an optional
+// join it requires (e.g. a price column living on a dimension table).
+type MeasureDef = { sql: string; format: "usd" | "number" | "ms" | "percent"; join?: string };
 
 const MEASURES: Record<string, MeasureDef> = {
   cost: { sql: "SUM(cost_usd)", format: "usd" },
@@ -12,6 +13,12 @@ const MEASURES: Record<string, MeasureDef> = {
   unknown_share: {
     sql: "SUM(CASE WHEN attribution_status = 'unknown' THEN cost_usd END) / SUM(cost_usd)",
     format: "percent",
+  },
+  // tokens x the model's list price for that token type — needs the models join
+  list_cost: {
+    sql: "SUM(tokens * CASE token_type WHEN 'input' THEN m.input_price_per_mtok WHEN 'output' THEN m.output_price_per_mtok WHEN 'cache_read' THEN m.cache_read_price_per_mtok WHEN 'cache_write' THEN m.cache_write_price_per_mtok END / 1e6)",
+    format: "usd",
+    join: "JOIN models m USING (model_id)",
   },
 };
 
@@ -54,7 +61,7 @@ function getColumns(spec: QuerySpec): string[] {
   const time = timeBucket(spec);
   return [
     ...(time ? [`${time} AS time`] : []),
-    ...dimensions.map((d) => dimensionLookup(d).col),
+    ...dimensions.map((d) => `${dimensionLookup(d).col} AS ${d}`),
     ...measures.map((m) => `${measureLookup(m).sql} AS ${m}`),
   ];
 }
@@ -87,10 +94,13 @@ function getGroupBy(spec: QuerySpec): string {
   return parts.length ? `GROUP BY ${parts.join(", ")}` : "";
 }
 
-// JOIN clause: demand-driven, only what the referenced dimensions declare
-function getJoins({ dimensions = [], filters = [] }: QuerySpec): string {
-  const referenced = [...dimensions, ...filters.map((f) => f.dim)];
-  const joins = referenced.map((d) => dimensionLookup(d).join).filter(Boolean);
+// JOIN clause: demand-driven, collected from everything the spec references
+function getJoins({ measures, dimensions = [], filters = [] }: QuerySpec): string {
+  const joins = [
+    ...dimensions.map((d) => dimensionLookup(d).join),
+    ...filters.map((f) => dimensionLookup(f.dim).join),
+    ...measures.map((m) => measureLookup(m).join),
+  ].filter(Boolean);
   return [...new Set(joins)].join(" ");
 }
 

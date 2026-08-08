@@ -37,7 +37,7 @@ export function WidgetGrid({
             layout={layout}
             onLayoutChange={onLayoutChange}
             gridConfig={{ cols: 12, rowHeight: 80, margin: [16, 16], containerPadding: [0, 0] }}
-            dragConfig={{ enabled: editing, cancel: "input, select, button" }}
+            dragConfig={{ enabled: editing, handle: ".widget-drag-handle" }}
             resizeConfig={{ enabled: editing, handles: ["se", "sw", "ne", "nw"] }}
             compactor={verticalCompactor}
           >

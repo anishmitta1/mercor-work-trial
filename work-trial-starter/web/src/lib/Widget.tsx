@@ -6,6 +6,7 @@ import { formatValue } from "./utils/format";
 import { WidgetConfig } from "./WidgetConfig";
 import { DataTable } from "./components/DataTable";
 import type { ColumnDef } from "@tanstack/react-table";
+import { XStack } from "./primitives/Stack";
 import { Text } from "./primitives/Text";
 import type { WidgetDef } from "./types";
 import type { Row } from "./api/client";
@@ -55,9 +56,12 @@ export function Widget({
         overflow: "auto",
       }}
     >
-      <Text variant="cardTitle" as="h3">
-        {def.title}
-      </Text>
+      <XStack justify="space-between" align="center">
+        <Text variant="cardTitle" as="h3">
+          {def.title}
+        </Text>
+        {editing && <DragHandle />}
+      </XStack>
       <div style={{ marginTop: "var(--space-3)" }}>
         {editing && onChange && (
           <WidgetConfig def={def} onChange={onChange} onRemove={onRemove} />
@@ -68,6 +72,24 @@ export function Widget({
         {!invalid && rows && <WidgetBody def={def} rows={rows} />}
       </div>
     </section>
+  );
+}
+
+// Grip affordance, edit mode only. Carries the RGL drag-handle class.
+function DragHandle() {
+  return (
+    <svg
+      className="widget-drag-handle"
+      width="10"
+      height="16"
+      viewBox="0 0 10 16"
+      fill="var(--text-subtle)"
+      aria-label="Drag to rearrange"
+    >
+      {[4, 8, 12].map((y) =>
+        [2, 8].map((x) => <circle key={`${x}-${y}`} cx={x} cy={y} r="1.5" />),
+      )}
+    </svg>
   );
 }
 

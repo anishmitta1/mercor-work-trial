@@ -5,3 +5,11 @@
   border-radius: var(--radius);
   opacity: 1;
 }
+
+/* drag handle cursor: open hand, closed hand while dragging */
+.widget-drag-handle {
+  cursor: grab;
+}
+.widget-drag-handle:active {
+  cursor: grabbing;
+}

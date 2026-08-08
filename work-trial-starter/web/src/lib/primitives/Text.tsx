@@ -24,11 +24,17 @@ export function Text({
   as: Tag = "span",
   children,
   style,
+  className,
 }: {
   variant?: TextVariant;
   as?: ElementType;
   children: ReactNode;
   style?: CSSProperties;
+  className?: string;
 }) {
-  return <Tag style={{ margin: 0, ...variants[variant], ...style }}>{children}</Tag>;
+  return (
+    <Tag className={className} style={{ margin: 0, ...variants[variant], ...style }}>
+      {children}
+    </Tag>
+  );
 }
