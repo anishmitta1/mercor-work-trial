@@ -14,6 +14,7 @@ export function WidgetGrid({
   widgets,
   layout,
   rearranging,
+  autoEditId,
   onLayoutChange,
   onWidgetChange,
   onWidgetRemove,
@@ -22,6 +23,7 @@ export function WidgetGrid({
   widgets: WidgetDef[];
   layout: Layout;
   rearranging: boolean;
+  autoEditId?: string | null;
   onLayoutChange: (layout: Layout) => void;
   onWidgetChange: (id: string, next: WidgetDef) => void;
   onWidgetRemove: (id: string) => void;
@@ -47,6 +49,8 @@ export function WidgetGrid({
                 <Widget
                   def={w}
                   rearranging={rearranging}
+                  startEditing={w.id === autoEditId}
+                  onCancel={w.id === autoEditId ? () => onWidgetRemove(w.id) : undefined}
                   onChange={(next) => onWidgetChange(w.id, next)}
                   onRemove={() => onWidgetRemove(w.id)}
                 />

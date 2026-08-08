@@ -62,6 +62,7 @@ export function WidgetConfig({
       <input
         style={fieldStyle}
         value={def.title}
+        placeholder="Widget title"
         onChange={(e) => onChange({ ...def, title: e.target.value })}
       />
 

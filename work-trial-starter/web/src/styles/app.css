@@ -23,3 +23,10 @@
 .widget-edit[aria-expanded="true"] {
   opacity: 1;
 }
+
+/* focus: subtle token ring instead of the browser default */
+:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}

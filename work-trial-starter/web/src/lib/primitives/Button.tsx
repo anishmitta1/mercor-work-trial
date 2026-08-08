@@ -9,6 +9,7 @@ type ButtonVariant = "default" | "dashed" | "unstyled";
 export function Button({
   variant = "default",
   active = false,
+  disabled,
   style,
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -42,7 +43,14 @@ export function Button({
 
   return (
     <button
-      style={{ font: "inherit", cursor: "pointer", ...variantStyle, ...style }}
+      disabled={disabled}
+      style={{
+        font: "inherit",
+        cursor: disabled ? "not-allowed" : "pointer",
+        opacity: disabled ? 0.45 : undefined, // undefined -> CSS (hover reveal) owns opacity
+        ...variantStyle,
+        ...style,
+      }}
       {...props}
     />
   );

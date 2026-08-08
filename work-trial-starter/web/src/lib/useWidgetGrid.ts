@@ -9,6 +9,7 @@ export function useWidgetGrid() {
   const [widgets, setWidgets] = useState<WidgetDef[]>(DEFAULT_WIDGETS);
   const [layout, setLayout] = useState<Layout>(DEFAULT_LAYOUT);
   const [rearranging, setRearranging] = useState(false);
+  const [autoEditId, setAutoEditId] = useState<string | null>(null);
 
   const updateWidget = (id: string, next: WidgetDef) =>
     setWidgets((ws) => ws.map((w) => (w.id === id ? next : w)));
@@ -22,15 +23,17 @@ export function useWidgetGrid() {
     const id = crypto.randomUUID();
     setWidgets((ws) => [
       ...ws,
-      { id, type: "kpi", title: "New widget", spec: { measures: ["cost"] } },
+      { id, type: "kpi", title: "", spec: { measures: ["cost"] } },
     ]);
     setLayout((l) => [...l, { i: id, x: 0, y: Infinity, w: 6, h: 3 }]); // appends at bottom
+    setAutoEditId(id); // opens the new widget's editor on mount
   };
 
   return {
     widgets,
     layout,
     rearranging,
+    autoEditId,
     toggleRearranging: () => setRearranging((r) => !r),
     onLayoutChange: setLayout,
     onWidgetChange: updateWidget,

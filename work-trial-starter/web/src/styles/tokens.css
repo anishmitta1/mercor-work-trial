@@ -82,3 +82,13 @@ body {
   background: var(--bg);
   -webkit-font-smoothing: antialiased;
 }
+
+/* overlay scrim for modal dialogs */
+:root {
+  --overlay: rgba(20, 20, 19, 0.35);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --overlay: rgba(0, 0, 0, 0.55);
+  }
+}

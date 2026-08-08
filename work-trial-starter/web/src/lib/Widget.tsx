@@ -1,6 +1,7 @@
 // A widget = a renderer type + a query spec. Nothing else.
 // (Position lives in RGL's layout array, keyed by WidgetDef.id — not here.)
-import { useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
+import { motion } from "motion/react";
 import { useQuerySpec } from "./api/useQuerySpec";
 import { useMeasureFormat, useMeta } from "./api/useMeta";
 import { formatValue } from "./utils/format";
@@ -8,6 +9,7 @@ import { WidgetConfig } from "./WidgetConfig";
 import { DataTable } from "./components/DataTable";
 import type { ColumnDef } from "@tanstack/react-table";
 import { XStack } from "./primitives/Stack";
+import { Modal } from "./primitives/Modal";
 import { Button } from "./primitives/Button";
 import { Text } from "./primitives/Text";
 import type { WidgetDef } from "./types";
@@ -32,62 +34,151 @@ function validateWidget(def: WidgetDef): string | null {
   }
 }
 
+const cardStyle: CSSProperties = {
+  background: "var(--bg)",
+  border: "1px solid var(--border)",
+  borderRadius: "var(--radius)",
+  padding: "var(--space-4)",
+  boxSizing: "border-box",
+  overflow: "auto",
+};
+
 export function Widget({
   def,
   rearranging,
+  startEditing = false,
   onChange,
   onRemove,
+  onCancel,
 }: {
   def: WidgetDef;
   rearranging?: boolean;
+  startEditing?: boolean;
   onChange?: (next: WidgetDef) => void;
   onRemove?: () => void;
+  onCancel?: () => void; // shown in the editor for a just-added widget
 }) {
-  const [configOpen, setConfigOpen] = useState(false);
+  const [editing, setEditing] = useState(startEditing);
+  // skeleton masks the morph; real content fades in once the box settles
+  const [settled, setSettled] = useState(false);
   const invalid = validateWidget(def);
   const { data: rows, isPending, error } = useQuerySpec(def.spec, !invalid);
 
+  useEffect(() => {
+    if (!editing) return setSettled(false);
+    const t = setTimeout(() => setSettled(true), 220);
+    return () => clearTimeout(t);
+  }, [editing]);
+
+  // Radix handles Esc/scrim/focus; dismissing a just-added widget cancels it
+  const onOpenChange = (open: boolean) => {
+    if (open) return setEditing(true);
+    setSettled(false); // content fades to 80% for the closing morph too
+    if (onCancel) onCancel();
+    else setEditing(false);
+  };
+
   return (
-    <section
-      className="widget"
-      style={{
-        background: "var(--surface)",
-        border: "1px solid var(--border)",
-        borderRadius: "var(--radius)",
-        padding: "var(--space-4)",
-        height: "100%",
-        boxSizing: "border-box",
-        overflow: "auto",
-      }}
-    >
-      <XStack justify="space-between" align="center">
-        <Text variant="cardTitle" as="h3">
-          {def.title}
-        </Text>
-        <XStack gap={2} align="center">
-          <Button
-            variant="unstyled"
-            className="widget-edit"
-            aria-expanded={configOpen}
-            onClick={() => setConfigOpen((o) => !o)}
-            style={{ fontSize: "var(--fs-xs)", color: configOpen ? "var(--accent)" : "var(--text-subtle)" }}
-          >
-            {configOpen ? "Done" : "Edit"}
-          </Button>
-          {rearranging && <DragHandle />}
+    <>
+      <motion.section layoutId={`widget-${def.id}`} className="widget" style={{ ...cardStyle, height: "100%" }}>
+        <XStack justify="space-between" align="center">
+          <Text variant="cardTitle" as="h3">
+            {def.title || "Untitled widget"}
+          </Text>
+          <XStack gap={2} align="center">
+            {onChange && !rearranging && (
+              <Button
+                variant="unstyled"
+                className="widget-edit"
+                onClick={() => setEditing(true)}
+                style={{ fontSize: "var(--fs-xs)", color: "var(--text-subtle)" }}
+              >
+                Edit
+              </Button>
+            )}
+            {rearranging && <DragHandle />}
+          </XStack>
         </XStack>
-      </XStack>
-      <div style={{ marginTop: "var(--space-3)" }}>
-        {configOpen && onChange && (
-          <WidgetConfig def={def} onChange={onChange} onRemove={onRemove} />
-        )}
-        {invalid && <Text variant="warn">Invalid config: {invalid}</Text>}
-        {!invalid && isPending && <Text variant="subtle">Loading…</Text>}
-        {!invalid && error && <Text variant="error">{error.message}</Text>}
-        {!invalid && rows && <WidgetBody def={def} rows={rows} />}
-      </div>
-    </section>
+        <div style={{ marginTop: "var(--space-3)" }}>
+          <WidgetContent def={def} invalid={invalid} isPending={isPending} error={error} rows={rows} />
+        </div>
+      </motion.section>
+
+      <Modal
+        open={editing}
+        onOpenChange={onOpenChange}
+        layoutId={`widget-${def.id}`}
+        title={def.title || "Untitled widget"}
+      >
+        <XStack justify="space-between" align="center">
+          <Text variant="cardTitle" as="h3">
+            {def.title}
+          </Text>
+          <XStack gap={2} align="center">
+            {onCancel && (
+              <Button
+                variant="unstyled"
+                onClick={onCancel}
+                style={{ fontSize: "var(--fs-sm)", color: "var(--text-subtle)" }}
+              >
+                Cancel
+              </Button>
+            )}
+            <Button
+              onClick={() => {
+                setSettled(false);
+                setEditing(false);
+              }}
+              disabled={!def.title.trim()}
+            >
+              Done
+            </Button>
+          </XStack>
+        </XStack>
+        <div
+          style={{
+            marginTop: "var(--space-3)",
+            opacity: settled ? 1 : 0.8, // masks the two-sided morph
+            transition: "opacity 150ms ease",
+          }}
+        >
+          <WidgetConfig
+            def={def}
+            onChange={onChange!}
+            onRemove={() => {
+              setEditing(false);
+              onRemove?.();
+            }}
+          />
+          <Text variant="subtle">Preview</Text>
+          <div style={{ marginTop: "var(--space-2)" }}>
+            <WidgetContent def={def} invalid={invalid} isPending={isPending} error={error} rows={rows} />
+          </div>
+        </div>
+      </Modal>
+    </>
   );
+}
+
+// The status chain + body, shared by the card and the edit modal's preview.
+function WidgetContent({
+  def,
+  invalid,
+  isPending,
+  error,
+  rows,
+}: {
+  def: WidgetDef;
+  invalid: string | null;
+  isPending: boolean;
+  error: Error | null;
+  rows: Row[] | undefined;
+}) {
+  if (invalid) return <Text variant="warn">Invalid config: {invalid}</Text>;
+  if (isPending) return <Text variant="subtle">Loading…</Text>;
+  if (error) return <Text variant="error">{error.message}</Text>;
+  if (rows) return <WidgetBody def={def} rows={rows} />;
+  return null;
 }
 
 // Grip affordance, edit mode only. Carries the RGL drag-handle class.
