@@ -13,7 +13,7 @@ import type { WidgetDef } from "../types";
 export function WidgetGrid({
   widgets,
   layout,
-  editing,
+  rearranging,
   onLayoutChange,
   onWidgetChange,
   onWidgetRemove,
@@ -21,7 +21,7 @@ export function WidgetGrid({
 }: {
   widgets: WidgetDef[];
   layout: Layout;
-  editing: boolean;
+  rearranging: boolean;
   onLayoutChange: (layout: Layout) => void;
   onWidgetChange: (id: string, next: WidgetDef) => void;
   onWidgetRemove: (id: string) => void;
@@ -38,15 +38,15 @@ export function WidgetGrid({
             layout={layout}
             onLayoutChange={onLayoutChange}
             gridConfig={{ cols: 12, rowHeight: 80, margin: [16, 16], containerPadding: [0, 0] }}
-            dragConfig={{ enabled: editing, handle: ".widget-drag-handle" }}
-            resizeConfig={{ enabled: editing, handles: ["se", "sw", "ne", "nw"] }}
+            dragConfig={{ enabled: rearranging, handle: ".widget-drag-handle" }}
+            resizeConfig={{ enabled: rearranging, handles: ["se", "sw", "ne", "nw"] }}
             compactor={verticalCompactor}
           >
             {widgets.map((w) => (
               <div key={w.id}>
                 <Widget
                   def={w}
-                  editing={editing}
+                  rearranging={rearranging}
                   onChange={(next) => onWidgetChange(w.id, next)}
                   onRemove={() => onWidgetRemove(w.id)}
                 />
@@ -56,11 +56,9 @@ export function WidgetGrid({
         )}
       </div>
 
-      {editing && (
-        <Button variant="dashed" onClick={onAddWidget}>
-          + Add widget
-        </Button>
-      )}
+      <Button variant="dashed" onClick={onAddWidget}>
+        + Add widget
+      </Button>
     </>
   );
 }

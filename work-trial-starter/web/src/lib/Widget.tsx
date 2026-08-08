@@ -1,5 +1,6 @@
 // A widget = a renderer type + a query spec. Nothing else.
 // (Position lives in RGL's layout array, keyed by WidgetDef.id — not here.)
+import { useState } from "react";
 import { useQuerySpec } from "./api/useQuerySpec";
 import { useMeasureFormat, useMeta } from "./api/useMeta";
 import { formatValue } from "./utils/format";
@@ -7,6 +8,7 @@ import { WidgetConfig } from "./WidgetConfig";
 import { DataTable } from "./components/DataTable";
 import type { ColumnDef } from "@tanstack/react-table";
 import { XStack } from "./primitives/Stack";
+import { Button } from "./primitives/Button";
 import { Text } from "./primitives/Text";
 import type { WidgetDef } from "./types";
 import type { Row } from "./api/client";
@@ -32,20 +34,22 @@ function validateWidget(def: WidgetDef): string | null {
 
 export function Widget({
   def,
-  editing,
+  rearranging,
   onChange,
   onRemove,
 }: {
   def: WidgetDef;
-  editing?: boolean;
+  rearranging?: boolean;
   onChange?: (next: WidgetDef) => void;
   onRemove?: () => void;
 }) {
+  const [configOpen, setConfigOpen] = useState(false);
   const invalid = validateWidget(def);
   const { data: rows, isPending, error } = useQuerySpec(def.spec, !invalid);
 
   return (
     <section
+      className="widget"
       style={{
         background: "var(--surface)",
         border: "1px solid var(--border)",
@@ -60,10 +64,21 @@ export function Widget({
         <Text variant="cardTitle" as="h3">
           {def.title}
         </Text>
-        {editing && <DragHandle />}
+        <XStack gap={2} align="center">
+          <Button
+            variant="unstyled"
+            className="widget-edit"
+            aria-expanded={configOpen}
+            onClick={() => setConfigOpen((o) => !o)}
+            style={{ fontSize: "var(--fs-xs)", color: configOpen ? "var(--accent)" : "var(--text-subtle)" }}
+          >
+            {configOpen ? "Done" : "Edit"}
+          </Button>
+          {rearranging && <DragHandle />}
+        </XStack>
       </XStack>
       <div style={{ marginTop: "var(--space-3)" }}>
-        {editing && onChange && (
+        {configOpen && onChange && (
           <WidgetConfig def={def} onChange={onChange} onRemove={onRemove} />
         )}
         {invalid && <Text variant="warn">Invalid config: {invalid}</Text>}

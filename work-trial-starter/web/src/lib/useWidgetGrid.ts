@@ -8,7 +8,7 @@ import { DEFAULT_LAYOUT, DEFAULT_WIDGETS } from "../dashboard";
 export function useWidgetGrid() {
   const [widgets, setWidgets] = useState<WidgetDef[]>(DEFAULT_WIDGETS);
   const [layout, setLayout] = useState<Layout>(DEFAULT_LAYOUT);
-  const [editing, setEditing] = useState(false);
+  const [rearranging, setRearranging] = useState(false);
 
   const updateWidget = (id: string, next: WidgetDef) =>
     setWidgets((ws) => ws.map((w) => (w.id === id ? next : w)));
@@ -30,8 +30,8 @@ export function useWidgetGrid() {
   return {
     widgets,
     layout,
-    editing,
-    toggleEditing: () => setEditing((e) => !e),
+    rearranging,
+    toggleRearranging: () => setRearranging((r) => !r),
     onLayoutChange: setLayout,
     onWidgetChange: updateWidget,
     onWidgetRemove: removeWidget,

@@ -5,7 +5,7 @@ import { XStack, YStack } from "./lib/primitives/Stack";
 import { Text } from "./lib/primitives/Text";
 
 export function App() {
-  const { editing, toggleEditing, ...gridProps } = useWidgetGrid();
+  const { rearranging, toggleRearranging, ...gridProps } = useWidgetGrid();
 
   return (
     <main style={{ maxWidth: 960, margin: "0 auto", padding: "var(--space-8) var(--space-5)" }}>
@@ -14,12 +14,12 @@ export function App() {
           <Text variant="title" as="h1">
             LLM Spend
           </Text>
-          <Button active={editing} onClick={toggleEditing}>
-            {editing ? "Done" : "Edit"}
+          <Button active={rearranging} onClick={toggleRearranging}>
+            {rearranging ? "Done" : "Rearrange"}
           </Button>
         </XStack>
 
-        <WidgetGrid editing={editing} {...gridProps} />
+        <WidgetGrid rearranging={rearranging} {...gridProps} />
       </YStack>
     </main>
   );
