@@ -82,12 +82,10 @@ export function DateRangePicker({
         firstDayOfWeek={0} // Sunday-first
         value={picking ? draft : [start ?? null, end ? dayBefore(end) : null]}
         onChange={([s, e]) => {
-          if (s && s === draft[0])
-            commit(s, s); // second click on same day = single-day range
+          if (s && e) commit(s, e); // complete range (Mantine emits sorted pair)
           else if (!s && !e && draft[0])
-            commit(draft[0], draft[0]); // Mantine deselects on same-day click
-          else if (s && e) commit(s, e);
-          else setDraft([s, e]);
+            commit(draft[0], draft[0]); // same-day re-click deselects -> single-day range
+          else setDraft([s, e]); // first click: remember the start
         }}
         minDate={min}
         maxDate={max}
