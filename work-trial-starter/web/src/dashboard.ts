@@ -2,7 +2,7 @@
 // widgets = what each card shows; layout = where it sits (RGL grid units).
 // Both are plain data: edit mode mutates copies in state, export is JSON.stringify.
 import type { Layout } from "react-grid-layout";
-import type { WidgetDef } from "./lib/types";
+import type { WidgetDef } from "./lib/widget/types";
 
 export const DEFAULT_WIDGETS: WidgetDef[] = [
   {

@@ -24,7 +24,7 @@ export function Modal({
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  layoutId: string; // shared with the triggering element for the morph
+  layoutId?: string; // shared with a triggering element for the morph; omit for a plain fade
   title: string;
   children: ReactNode;
 }) {
@@ -45,7 +45,14 @@ export function Modal({
             <Dialog.Content asChild forceMount>
               <motion.section
                 layoutId={layoutId}
-                transition={TRANSITION}
+                {...(layoutId
+                  ? { transition: TRANSITION }
+                  : {
+                      initial: { opacity: 0 },
+                      animate: { opacity: 1 },
+                      exit: { opacity: 0 },
+                      transition: { duration: 0.2 },
+                    })}
                 style={{
                   position: "fixed",
                   top: "8vh",

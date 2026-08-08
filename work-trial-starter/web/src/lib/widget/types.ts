@@ -1,4 +1,4 @@
-import type { QuerySpec } from "./api/client";
+import type { QuerySpec } from "../api/client";
 
 export type WidgetType = "kpi" | "series" | "table";
 

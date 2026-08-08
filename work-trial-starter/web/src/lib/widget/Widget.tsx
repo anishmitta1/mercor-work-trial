@@ -2,19 +2,19 @@
 // (Position lives in RGL's layout array, keyed by WidgetDef.id — not here.)
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { motion } from "motion/react";
-import { useQuerySpec } from "./api/useQuerySpec";
-import { useMeasureFormat, useMeta } from "./api/useMeta";
-import { formatValue } from "./utils/format";
-import { mergeGlobalFilters, type GlobalFilters } from "./utils/mergeFilters";
+import { useQuerySpec } from "../api/useQuerySpec";
+import { useMeasureFormat, useMeta } from "../api/useMeta";
+import { formatValue } from "../utils/format";
+import { mergeGlobalFilters, type GlobalFilters } from "../utils/mergeFilters";
 import { WidgetConfig } from "./WidgetConfig";
-import { DataTable } from "./components/DataTable";
+import { DataTable } from "../components/DataTable";
 import type { ColumnDef } from "@tanstack/react-table";
-import { XStack } from "./primitives/Stack";
-import { Modal } from "./primitives/Modal";
-import { Button } from "./primitives/Button";
-import { Text } from "./primitives/Text";
+import { XStack } from "../primitives/Stack";
+import { Modal } from "../primitives/Modal";
+import { Button } from "../primitives/Button";
+import { Text } from "../primitives/Text";
 import type { WidgetDef } from "./types";
-import type { Row } from "./api/client";
+import type { Row } from "../api/client";
 
 export type { WidgetDef } from "./types";
 
@@ -47,41 +47,21 @@ const cardStyle: CSSProperties = {
 export function Widget({
   def,
   rearranging,
-  startEditing = false,
   filters,
   onChange,
   onRemove,
-  onCancel,
 }: {
   def: WidgetDef;
   rearranging?: boolean;
-  startEditing?: boolean;
   filters?: GlobalFilters;
   onChange?: (next: WidgetDef) => void;
   onRemove?: () => void;
-  onCancel?: () => void; // shown in the editor for a just-added widget
 }) {
-  const [editing, setEditing] = useState(startEditing);
-  // skeleton masks the morph; real content fades in once the box settles
-  const [settled, setSettled] = useState(false);
+  const [editing, setEditing] = useState(false);
   const invalid = validateWidget(def);
   // every widget query merges the global filters — one code path, coherent dashboard
   const spec = useMemo(() => mergeGlobalFilters(def.spec, filters ?? {}), [def.spec, filters]);
   const { data: rows, isPending, error } = useQuerySpec(spec, !invalid);
-
-  useEffect(() => {
-    if (!editing) return setSettled(false);
-    const t = setTimeout(() => setSettled(true), 220);
-    return () => clearTimeout(t);
-  }, [editing]);
-
-  // Radix handles Esc/scrim/focus; dismissing a just-added widget cancels it
-  const onOpenChange = (open: boolean) => {
-    if (open) return setEditing(true);
-    setSettled(false); // content fades to 80% for the closing morph too
-    if (onCancel) onCancel();
-    else setEditing(false);
-  };
 
   return (
     <>
@@ -111,56 +91,91 @@ export function Widget({
 
       <Modal
         open={editing}
-        onOpenChange={onOpenChange}
+        onOpenChange={setEditing}
         layoutId={`widget-${def.id}`}
         title={def.title || "Untitled widget"}
       >
-        <XStack justify="space-between" align="center">
-          <Text variant="cardTitle" as="h3">
-            {def.title}
-          </Text>
-          <XStack gap={2} align="center">
-            {onCancel && (
-              <Button
-                variant="unstyled"
-                onClick={onCancel}
-                style={{ fontSize: "var(--fs-sm)", color: "var(--text-subtle)" }}
-              >
-                Cancel
-              </Button>
-            )}
-            <Button
-              onClick={() => {
-                setSettled(false);
-                setEditing(false);
-              }}
-              disabled={!def.title.trim()}
-            >
-              Done
-            </Button>
-          </XStack>
-        </XStack>
-        <div
-          style={{
-            marginTop: "var(--space-3)",
-            opacity: settled ? 1 : 0.8, // masks the two-sided morph
-            transition: "opacity 150ms ease",
-          }}
-        >
-          <WidgetConfig
-            def={def}
-            onChange={onChange!}
-            onRemove={() => {
-              setEditing(false);
-              onRemove?.();
-            }}
-          />
-          <Text variant="subtle">Preview</Text>
-          <div style={{ marginTop: "var(--space-2)" }}>
-            <WidgetContent def={def} invalid={invalid} isPending={isPending} error={error} rows={rows} />
-          </div>
-        </div>
+        <WidgetEditor
+          def={def}
+          filters={filters}
+          onChange={onChange!}
+          onRemove={
+            onRemove
+              ? () => {
+                  setEditing(false);
+                  onRemove();
+                }
+              : undefined
+          }
+          onDone={() => setEditing(false)}
+        />
       </Modal>
+    </>
+  );
+}
+
+// The widget editor (config + live preview) inside a modal. Used for existing
+// widgets AND for the add-widget draft (which has no card until Done).
+export function WidgetEditor({
+  def,
+  filters,
+  onChange,
+  onRemove,
+  onCancel,
+  onDone,
+}: {
+  def: WidgetDef;
+  filters?: GlobalFilters;
+  onChange: (next: WidgetDef) => void;
+  onRemove?: () => void;
+  onCancel?: () => void;
+  onDone: () => void;
+}) {
+  // content rides any morph at 80% opacity, settling to full
+  const [settled, setSettled] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setSettled(true), 220);
+    return () => clearTimeout(t);
+  }, []);
+
+  const invalid = validateWidget(def);
+  const spec = useMemo(() => mergeGlobalFilters(def.spec, filters ?? {}), [def.spec, filters]);
+  const { data: rows, isPending, error } = useQuerySpec(spec, !invalid);
+
+  return (
+    <>
+      <XStack justify="space-between" align="center">
+        <Text variant="cardTitle" as="h3">
+          {def.title || "Untitled widget"}
+        </Text>
+        <XStack gap={2} align="center">
+          {onCancel && (
+            <Button
+              variant="unstyled"
+              onClick={onCancel}
+              style={{ fontSize: "var(--fs-sm)", color: "var(--text-subtle)" }}
+            >
+              Cancel
+            </Button>
+          )}
+          <Button onClick={onDone} disabled={!def.title.trim()}>
+            Done
+          </Button>
+        </XStack>
+      </XStack>
+      <div
+        style={{
+          marginTop: "var(--space-3)",
+          opacity: settled ? 1 : 0.8,
+          transition: "opacity 150ms ease",
+        }}
+      >
+        <WidgetConfig def={def} onChange={onChange} onRemove={onRemove} />
+        <Text variant="subtle">Preview</Text>
+        <div style={{ marginTop: "var(--space-2)" }}>
+          <WidgetContent def={def} invalid={invalid} isPending={isPending} error={error} rows={rows} />
+        </div>
+      </div>
     </>
   );
 }

@@ -16,23 +16,26 @@ export function ButtonGroup({
       style={{
         display: "inline-flex",
         border: "1px solid var(--border)",
-        borderRadius: "var(--radius-sm)",
+        borderRadius: "var(--radius)",
         overflow: "hidden",
+        paddingTop: "2px",
+        paddingBottom: "2px",
+        paddingRight: "2px",
+        paddingLeft: "2px",
+        gap: "2px",
       }}
     >
-      {options.map((o, i) => {
+      {options.map((o) => {
         const active = selected.includes(o.value);
         return (
           <Button
             key={o.value}
-            variant="unstyled"
             onClick={() => onToggle(o.value)}
             style={{
-              padding: "var(--space-1) var(--space-3)",
-              fontSize: "var(--fs-sm)",
               color: active ? "var(--accent)" : "var(--text-muted)",
               background: active ? "var(--accent-weak)" : "var(--surface)",
-              borderLeft: i > 0 ? "1px solid var(--border)" : undefined,
+              border: "none",
+              transition: "all 0.2s ease-in-out",
             }}
           >
             {o.label}
