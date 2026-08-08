@@ -7,6 +7,7 @@ import ReactGridLayout, {
 } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import { Widget } from "../Widget";
+import { Button } from "../primitives/Button";
 import type { WidgetDef } from "../types";
 
 export function WidgetGrid({
@@ -56,21 +57,9 @@ export function WidgetGrid({
       </div>
 
       {editing && (
-        <button
-          onClick={onAddWidget}
-          style={{
-            font: "inherit",
-            fontSize: "var(--fs-sm)",
-            color: "var(--text-subtle)",
-            background: "none",
-            border: "1px dashed var(--border-strong)",
-            borderRadius: "var(--radius)",
-            padding: "var(--space-3)",
-            cursor: "pointer",
-          }}
-        >
+        <Button variant="dashed" onClick={onAddWidget}>
           + Add widget
-        </button>
+        </Button>
       )}
     </>
   );

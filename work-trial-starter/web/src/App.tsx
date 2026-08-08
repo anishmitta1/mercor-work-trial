@@ -1,5 +1,6 @@
 import { WidgetGrid } from "./lib/components/WidgetGrid";
 import { useWidgetGrid } from "./lib/useWidgetGrid";
+import { Button } from "./lib/primitives/Button";
 import { XStack, YStack } from "./lib/primitives/Stack";
 import { Text } from "./lib/primitives/Text";
 
@@ -13,21 +14,9 @@ export function App() {
           <Text variant="title" as="h1">
             LLM Spend
           </Text>
-          <button
-            onClick={toggleEditing}
-            style={{
-              font: "inherit",
-              fontSize: "var(--fs-sm)",
-              color: editing ? "var(--accent)" : "var(--text-muted)",
-              background: editing ? "var(--accent-weak)" : "var(--surface)",
-              border: "1px solid var(--border)",
-              borderRadius: "var(--radius-sm)",
-              padding: "var(--space-1) var(--space-3)",
-              cursor: "pointer",
-            }}
-          >
+          <Button active={editing} onClick={toggleEditing}>
             {editing ? "Done" : "Edit"}
-          </button>
+          </Button>
         </XStack>
 
         <WidgetGrid editing={editing} {...gridProps} />

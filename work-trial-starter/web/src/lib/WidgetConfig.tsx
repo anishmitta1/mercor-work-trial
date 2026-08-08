@@ -2,6 +2,7 @@
 // Options come from /api/meta; only fields applicable to the widget's type render,
 // so invalid configs can't be produced (validateWidget stays the backstop).
 import { useMeta } from "./api/useMeta";
+import { Button } from "./primitives/Button";
 import { XStack } from "./primitives/Stack";
 import type { WidgetDef, WidgetType } from "./types";
 
@@ -125,9 +126,9 @@ export function WidgetConfig({
       )}
 
       {onRemove && (
-        <button style={{ ...fieldStyle, color: "var(--danger)" }} onClick={onRemove}>
+        <Button style={{ color: "var(--danger)" }} onClick={onRemove}>
           Remove
-        </button>
+        </Button>
       )}
     </XStack>
   );
