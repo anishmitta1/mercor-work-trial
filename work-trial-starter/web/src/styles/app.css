@@ -30,3 +30,8 @@
   outline-offset: 2px;
   border-radius: var(--radius-sm);
 }
+
+/* Mantine paints weekend days red-6 by default; keep them neutral */
+[data-weekend] {
+  color: var(--text) !important;
+}

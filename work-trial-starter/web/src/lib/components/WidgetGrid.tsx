@@ -7,7 +7,7 @@ import ReactGridLayout, {
 } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import { Widget } from "../Widget";
-import { Button } from "../primitives/Button";
+import type { GlobalFilters } from "../utils/mergeFilters";
 import type { WidgetDef } from "../types";
 
 export function WidgetGrid({
@@ -15,19 +15,19 @@ export function WidgetGrid({
   layout,
   rearranging,
   autoEditId,
+  filters,
   onLayoutChange,
   onWidgetChange,
   onWidgetRemove,
-  onAddWidget,
 }: {
   widgets: WidgetDef[];
   layout: Layout;
   rearranging: boolean;
   autoEditId?: string | null;
+  filters?: GlobalFilters;
   onLayoutChange: (layout: Layout) => void;
   onWidgetChange: (id: string, next: WidgetDef) => void;
   onWidgetRemove: (id: string) => void;
-  onAddWidget: () => void;
 }) {
   const { width, containerRef, mounted } = useContainerWidth();
 
@@ -49,6 +49,7 @@ export function WidgetGrid({
                 <Widget
                   def={w}
                   rearranging={rearranging}
+                  filters={filters}
                   startEditing={w.id === autoEditId}
                   onCancel={w.id === autoEditId ? () => onWidgetRemove(w.id) : undefined}
                   onChange={(next) => onWidgetChange(w.id, next)}
@@ -59,10 +60,6 @@ export function WidgetGrid({
           </ReactGridLayout>
         )}
       </div>
-
-      <Button variant="dashed" onClick={onAddWidget}>
-        + Add widget
-      </Button>
     </>
   );
 }

@@ -9,9 +9,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@mantine/core": "^9.5.1",
+    "@mantine/dates": "^9.5.1",
+    "@mantine/hooks": "^9.5.1",
     "@radix-ui/react-dialog": "^1.1.23",
+    "@radix-ui/react-popover": "^1.1.23",
     "@tanstack/react-query": "^5.101.4",
     "@tanstack/react-table": "^8.21.3",
+    "lucide-react": "^1.30.0",
     "motion": "^13.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

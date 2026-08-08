@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { Layout } from "react-grid-layout";
 import type { WidgetDef } from "./types";
+import type { GlobalFilters } from "./utils/mergeFilters";
 import { DEFAULT_LAYOUT, DEFAULT_WIDGETS } from "../dashboard";
 
 export function useWidgetGrid() {
@@ -10,6 +11,7 @@ export function useWidgetGrid() {
   const [layout, setLayout] = useState<Layout>(DEFAULT_LAYOUT);
   const [rearranging, setRearranging] = useState(false);
   const [autoEditId, setAutoEditId] = useState<string | null>(null);
+  const [filters, setFilters] = useState<GlobalFilters>({});
 
   const updateWidget = (id: string, next: WidgetDef) =>
     setWidgets((ws) => ws.map((w) => (w.id === id ? next : w)));
@@ -34,6 +36,8 @@ export function useWidgetGrid() {
     layout,
     rearranging,
     autoEditId,
+    filters,
+    setFilters,
     toggleRearranging: () => setRearranging((r) => !r),
     onLayoutChange: setLayout,
     onWidgetChange: updateWidget,

@@ -1,10 +1,11 @@
 // A widget = a renderer type + a query spec. Nothing else.
 // (Position lives in RGL's layout array, keyed by WidgetDef.id — not here.)
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { motion } from "motion/react";
 import { useQuerySpec } from "./api/useQuerySpec";
 import { useMeasureFormat, useMeta } from "./api/useMeta";
 import { formatValue } from "./utils/format";
+import { mergeGlobalFilters, type GlobalFilters } from "./utils/mergeFilters";
 import { WidgetConfig } from "./WidgetConfig";
 import { DataTable } from "./components/DataTable";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -47,6 +48,7 @@ export function Widget({
   def,
   rearranging,
   startEditing = false,
+  filters,
   onChange,
   onRemove,
   onCancel,
@@ -54,6 +56,7 @@ export function Widget({
   def: WidgetDef;
   rearranging?: boolean;
   startEditing?: boolean;
+  filters?: GlobalFilters;
   onChange?: (next: WidgetDef) => void;
   onRemove?: () => void;
   onCancel?: () => void; // shown in the editor for a just-added widget
@@ -62,7 +65,9 @@ export function Widget({
   // skeleton masks the morph; real content fades in once the box settles
   const [settled, setSettled] = useState(false);
   const invalid = validateWidget(def);
-  const { data: rows, isPending, error } = useQuerySpec(def.spec, !invalid);
+  // every widget query merges the global filters — one code path, coherent dashboard
+  const spec = useMemo(() => mergeGlobalFilters(def.spec, filters ?? {}), [def.spec, filters]);
+  const { data: rows, isPending, error } = useQuerySpec(spec, !invalid);
 
   useEffect(() => {
     if (!editing) return setSettled(false);
